@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item Reordering Example</title>
+    <style>
+        /* Add some basic styling for the lists */
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            border: 1px solid #ccc;
+        }
+        li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>Available Services</h2>
+    <ul id="availableList">
+        <li draggable="true">Car Wash</li>
+        <li draggable="true">Wax</li>
+        <li draggable="true">Vacuum</li>
+        <li draggable="true">Polish</li>
+        <li draggable="true">Drying</li>
+    </ul>
+
+    <h2>Selected Services</h2>
+    <ul id="selectedList"></ul>
+
+    <script>
+        // Get references to the lists
+        const availableList = document.getElementById("availableList");
+        const selectedList = document.getElementById("selectedList");
+
+        // Add a drop listener to the selectedList
+        selectedList.ondragover = (event) => {
+            event.preventDefault();
+        };
+
+        selectedList.ondrop = (event) => {
+            event.preventDefault();
+            const service = event.dataTransfer.getData("text/plain");
+            const listItem = document.createElement("li");
+            listItem.textContent = service;
+            selectedList.appendChild(listItem);
+        };
+
+        // Add a dragstart listener to the availableList items
+        availableList.addEventListener("dragstart", (event) => {
+            event.dataTransfer.setData("text/plain", event.target.textContent);
+        });
+    </script>
+</body>
+</html>
