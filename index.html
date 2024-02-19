@@ -1,14 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>My First Webpage</title>
-    <link rel="stylesheet" href="styles.css">
-  </head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Rock, Paper, Scissors</title>
+        <style>
+        * {
+	    border-style: solid;
+	    border-color: red;
+        }
 
-  <body>
-    <h1>Odin Recipes</h1>
-    <img src="https://www.allrecipes.com/thmb/WiJ_cWP01UKf2TErdCK1aXcgxbk=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/8417946-buffalo-chicken-sliders-ddmfs-3x4-1915-306e5e98496d460da48d3e932f51905a.jpg" alt="Buffalo chicken sliders">
-    <a href="recipes/lasagna.html">Lasagna</a>
-  </body>
+        /* Optional: Add some styling to the selected items */
+        .selected {
+            background-color: #f0f0f0;
+        }
+        
+        </style>
+    </head>
+
+    <body>
+        <h1>Rock, Paper, Scissors</h1>
+
+        <ol id="choices">
+            <li>rock</li>
+            <li>paper</li>
+            <li>scissors</li>
+            <!-- Add more list items as needed -->
+        </ol>
+
+        <script>
+
+        const choices = document.getElementById("choices");
+        let selectedCount = 0;
+
+        // Event listener for list item clicks
+        choices.addEventListener("click", (event) => {
+            const listItem = event.target;
+            const itemText = listItem.textContent;
+            const itemIndex = Array.from(choices.children).indexOf(listItem);
+            if (listItem.tagName === "LI") {
+                if (listItem.classList.contains("selected")) {
+                    // Deselect the item
+                    listItem.classList.remove("selected");
+                    selectedCount--;
+                    console.log("de-selected " + itemIndex + ", " + itemText);
+                } else if (selectedCount < 2) {
+                    // Select the item (up to 2 selections allowed)
+                    listItem.classList.add("selected");
+                    selectedCount++;
+                    console.log("selected " + itemIndex + ", " + itemText);
+                } else {
+                    // Overvote
+                    console.log("rejected (overvote) - ignoring " + itemIndex + ", " + itemText);
+                }
+            }
+        });
+
+
+        function getComputerChoice() {
+            let choices = ["rock", "paper", "scissor"];
+            return choices[(Math.floor(Math.random() * choices.length))]
+        }
+
+        function playRound(playerSelection, computerSelection) {
+            let playerSel = playerSelection.toLowerCase();
+            let computerSel = computerSelection.toLowerCase();
+            if (playerSel == computerSel) {
+                return "Tie - both choose " + playerSel
+            }
+            if (playerSel == "rock") {
+                if (computerSel == "paper") {
+                    return "you lose (paper beats rock"
+                }
+                return "you win (rock beats scissors)"
+            }
+            if (playerSel == "paper") {
+                if (computerSel == "rock") {
+                    return "you win (paper beats rock)"
+                }
+                return "you lose (scissors beats paper)"
+            }
+
+            if (playerSel == "scissors") {
+                if (computerSel == "rock") {
+                    return "you lose (rock beats scissors)"
+                }
+                return "you win (scissors beats paper)"
+            }
+        }
+
+        const playerSelection = "rock";
+        const computerSelection = getComputerChoice();
+        console.log(playRound(playerSelection, computerSelection));
+        
+
+        </script>
+    </body>
 </html>
