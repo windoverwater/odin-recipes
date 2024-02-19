@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Ordered List Example</title>
+    </head>
+    <body>
+        <h2>Select an item from the list:</h2>
+        <select id="firstList">
+            <option value="apple">Apple</option>
+            <option value="banana">Banana</option>
+            <option value="cherry">Cherry</option>
+        </select>
+
+        <h2>Selected item appears here:</h2>
+        <select id="secondList"></select>
+
+        <script>
+        const firstList = document.getElementById('firstList');
+        const secondList = document.getElementById('secondList');
+
+        // Event listener for selection in the first list
+        firstList.addEventListener('change', () => {
+            const selectedItem = firstList.value;
+            const option = document.createElement('option');
+            option.value = selectedItem;
+            option.textContent = selectedItem;
+            secondList.appendChild(option);
+        });
+        </script>
+    </body>
+</html>
