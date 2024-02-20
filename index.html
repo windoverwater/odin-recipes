@@ -2,96 +2,149 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Rock, Paper, Scissors</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Ordered List Example</title>
         <style>
-        * {
-	    border-style: solid;
-	    border-color: red;
-        }
-
-        /* Optional: Add some styling to the selected items */
-        .selected {
-            background-color: #f0f0f0;
+        /*
+         * {
+	   border-style: solid;
+	   border-color: red;
+           }
+         */
+        /* styles.css */
+        #sortableList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
         
+        #firstList li {
+            margin: 10px;
+            padding: 15px;
+            border: 1px solid #dfdfdf;
+            background: #f5f5f5;
+            list-style-type: none;
+        }
+
+        #sortableList li {
+            margin: 10px;
+            padding: 15px;
+            border: 1px solid #dfdfdf;
+            background: #f5f5f5;
+        }
+
+        #sortableList li.hint {
+            border: 1px solid #ffc49a;
+            background: #feffb4;
+        }
+
+        #sortableList li.active {
+            border: 1px solid #ffa5a5;
+            background: #ffe7e7;
+        }
+
         </style>
     </head>
-
     <body>
-        <h2>Rock, Paper, Scissors</h2>
+        <h2>A RCV (IRV) contest:</h2>
+        <ul>
+            <li>Clicking a candidate will add it to your RCV</li>
+            <li>Your RCV selection is re-orderable by drag-and-drop</li>
+            <li>Clicking a selection's remove button un-selects a candidate</li>
+        </ul>
 
-        <ol id="choices">
-            <li>rock</li>
-            <li>paper</li>
-            <li>scissors</li>
-            <!-- Add more list items as needed -->
+        <h2>Your RCV selection:</h2>
+        <ol id="sortableList"></ol>
+
+        <h2>Candidates:</h2>
+        <ul id="firstList">
+            <li>Apple</li>
+            <li>Banana</li>
+            <li>Cherry</li>
         </ol>
 
         <script>
+        // script.js
+        const firstList = document.getElementById('firstList');
+        const sortableList = document.getElementById('sortableList');
 
-        const choices = document.getElementById("choices");
-        let selectedCount = 0;
+        // Make the RCV selection sortable by drag-and-drop
+        function initSortableList(target) {
+            target.classList.add("slist");
+            const items = target.getElementsByTagName("li");
+            let current = null;
 
-        // Event listener for list item clicks
-        choices.addEventListener("click", (event) => {
-            const listItem = event.target;
-            const itemText = listItem.textContent;
-            const itemIndex = Array.from(choices.children).indexOf(listItem);
-            if (listItem.tagName === "LI") {
-                if (listItem.classList.contains("selected")) {
-                    // Deselect the item
-                    listItem.classList.remove("selected");
-                    selectedCount--;
-                    console.log("de-selected " + itemIndex + ", " + itemText);
-                } else if (selectedCount < 2) {
-                    // Select the item (up to 2 selections allowed)
-                    listItem.classList.add("selected");
-                    selectedCount++;
-                    console.log("selected " + itemIndex + ", " + itemText);
-                } else {
-                    // Overvote
-                    console.log("rejected (overvote) - ignoring " + itemIndex + ", " + itemText);
-                }
+            for (let i of items) {
+                i.draggable = true;
+
+                i.ondragstart = (e) => {
+                    current = i;
+                    for (let it of items) {
+                        if (it != current) {
+                            it.classList.add("hint");
+                        }
+                    }
+                };
+
+                i.ondragenter = (e) => {
+                    if (i != current) {
+                        i.classList.add("active");
+                    }
+                };
+
+                i.ondragleave = (e) => {
+                    i.classList.remove("active");
+                };
+
+                i.ondragend = (e) => {
+                    for (let it of items) {
+                        it.classList.remove("hint");
+                        it.classList.remove("active");
+                    }
+                };
+
+                i.ondragover = (e) => e.preventDefault();
+
+                i.ondrop = (e) => {
+                    if (i != current) {
+                        let currentPos = 0;
+                        let droppedPos = 0;
+
+                        for (let it = 0; it < items.length; it++) {
+                            if (current == items[it]) {
+                                currentPos = it;
+                            }
+                            if (i == items[it]) {
+                                droppedPos = it;
+                            }
+                        }
+
+                        if (currentPos < droppedPos) {
+                            i.parentNode.insertBefore(current, i.nextSibling);
+                        } else {
+                            i.parentNode.insertBefore(current, i);
+                        }
+                    }
+                };
+            }
+        }
+
+        // Event listener for selection in the first list
+        firstList.addEventListener('click', (event) => {
+            if (event.target.tagName === 'LI') {
+                const selectedItem = event.target.textContent;
+                const listItem = document.createElement('li');
+                listItem.textContent = selectedItem;
+                sortableList.appendChild(listItem);
+
+                // Remove the selected item from the first list
+                event.target.remove();
+
+                // Initialize the sortable list
+                initSortableList(document.getElementById("sortableList"));
             }
         });
 
-
-        function getComputerChoice() {
-            let choices = ["rock", "paper", "scissor"];
-            return choices[(Math.floor(Math.random() * choices.length))]
-        }
-
-        function playRound(playerSelection, computerSelection) {
-            let playerSel = playerSelection.toLowerCase();
-            let computerSel = computerSelection.toLowerCase();
-            if (playerSel == computerSel) {
-                return "Tie - both choose " + playerSel
-            }
-            if (playerSel == "rock") {
-                if (computerSel == "paper") {
-                    return "you lose (paper beats rock)"
-                }
-                return "you win (rock beats scissors)"
-            }
-            if (playerSel == "paper") {
-                if (computerSel == "rock") {
-                    return "you win (paper beats rock)"
-                }
-                return "you lose (scissors beats paper)"
-            }
-
-            if (playerSel == "scissors") {
-                if (computerSel == "rock") {
-                    return "you lose (rock beats scissors)"
-                }
-                return "you win (scissors beats paper)"
-            }
-        }
-
-        const playerSelection = "rock";
-        const computerSelection = getComputerChoice();
-        console.log(playRound(playerSelection, computerSelection));
-        
 
         </script>
     </body>

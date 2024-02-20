@@ -7,26 +7,43 @@
     </head>
     <body>
         <h2>Select an item from the list:</h2>
-        <select id="firstList">
-            <option value="apple">Apple</option>
-            <option value="banana">Banana</option>
-            <option value="cherry">Cherry</option>
-        </select>
+        <ol id="firstList">
+            <li>Apple</li>
+            <li>Banana</li>
+            <li>Cherry</li>
+        </ol>
 
         <h2>Selected item appears here:</h2>
-        <select id="secondList"></select>
+        <ol id="secondList"></ol>
 
         <script>
         const firstList = document.getElementById('firstList');
         const secondList = document.getElementById('secondList');
 
         // Event listener for selection in the first list
-        firstList.addEventListener('change', () => {
-            const selectedItem = firstList.value;
-            const option = document.createElement('option');
-            option.value = selectedItem;
-            option.textContent = selectedItem;
-            secondList.appendChild(option);
+        firstList.addEventListener('click', (event) => {
+            if (event.target.tagName === 'LI') {
+                const selectedItem = event.target.textContent;
+                const listItem = document.createElement('li');
+                listItem.textContent = selectedItem;
+                secondList.appendChild(listItem);
+
+                // Remove the selected item from the first list
+                event.target.remove();
+            }
+        });
+
+        // Event listener for selection in the second list
+        secondList.addEventListener('click', (event) => {
+            if (event.target.tagName === 'LI') {
+                const selectedItem = event.target.textContent;
+                const listItem = document.createElement('li');
+                listItem.textContent = selectedItem;
+                firstList.appendChild(listItem);
+
+                // Remove the selected item from the second list
+                event.target.remove();
+            }
         });
         </script>
     </body>
