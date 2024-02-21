@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Shopping List</title>
+        <link rel="stylesheet" type="text/css" href="list.css">
+    </head>
+    <body>
+        <h2>Shopping List</h2>
+        <ul id="shoppingList">
+            <li>Eggs <button class="remove">remove</button></li>
+            <li>Milk <button class="remove">remove</button></li>
+            <li>Cereal <button class="remove">remove</button></li>
+            <li>Chicken <button class="remove">remove</button></li>
+            <li>Oreos <button class="remove">remove</button></li>
+        </ul>
+
+        <h2>Shopping cart</h2>
+        <ul id="cart">
+        </ul>
+
+        <script>
+         // Get references to elements
+         var shoppingList = document.getElementsByTagName("shoppingList");
+         var toRemoveButtons = document.getElementsByClassName("remove");
+         const cart = document.getElementById('cart');
+
+         // Add event listeners to existing remove buttons
+         Array.prototype.slice.call(toRemoveButtons).forEach(function (item) {
+             item.addEventListener("click", function (e) {
+                 var itemName = e.target.parentNode.textContent.trim().replace(/ remove$/, "");;
+                 console.log("removed:", itemName);
+                 // remove it from the Shopping list
+                 e.target.parentNode.remove();
+                 // add to other list
+                 const listItem = document.createElement('li');
+                 listItem.textContent = itemName;
+                 cart.appendChild(listItem);
+
+             });
+         });
+
+        </script>
+
+    </body>
+</html>

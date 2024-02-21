@@ -46,7 +46,10 @@
         </style>
     </head>
     <body>
-        <h2>A RCV (IRV) contest:</h2>
+        <p>
+            <img src="drag-handle-horizontal.svg">
+        </p>
+            <h2>A RCV (IRV) contest:</h2>
         <ul>
             <li>Clicking a candidate will add it to your RCV</li>
             <li>Your RCV selection is re-orderable by drag-and-drop</li>
@@ -67,6 +70,7 @@
         // script.js
         const firstList = document.getElementById('firstList');
         const sortableList = document.getElementById('sortableList');
+        const toRemoveButtons = document.getElementsByClassName("remove");
 
         // Make the RCV selection sortable by drag-and-drop
         function initSortableList(target) {
@@ -129,13 +133,24 @@
             }
         }
 
-        // Event listener for selection in the first list
+        // Event listener for selection in the first list (when a candidate is selected)
         firstList.addEventListener('click', (event) => {
             if (event.target.tagName === 'LI') {
-                const selectedItem = event.target.textContent;
-                const listItem = document.createElement('li');
-                listItem.textContent = selectedItem;
-                sortableList.appendChild(listItem);
+                // Create a new selected item with a remove button
+                const selectedText = event.target.textContent;
+                const newItem = document.createElement('li');
+                const newButton = document.createElement('button');
+                const newSvg = document.createElementNS("http://www.w3.org/2000/svg", "img");
+
+                newSvg.setAttributeNS('http://www.w3.org/1999/xlink', 'src', 'drag-handle-horizontal.svg');
+
+                newButton.innerText = 'remove';
+                newButton.classList.add('remove'); 
+
+                newItem.textContent = selectedText + "  ";
+                newItem.appendChild(newButton);
+                newItem.appendChild(newSvg);
+                sortableList.appendChild(newItem);
 
                 // Remove the selected item from the first list
                 event.target.remove();
