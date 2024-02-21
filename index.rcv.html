@@ -140,12 +140,13 @@
                 const selectedText = event.target.textContent;
                 const newItem = document.createElement('li');
                 const newButton = document.createElement('button');
-                const newSvg = document.createElementNS("http://www.w3.org/2000/svg", "img");
-
-                newSvg.setAttributeNS('http://www.w3.org/1999/xlink', 'src', 'drag-handle-horizontal.svg');
 
                 newButton.innerText = 'remove';
                 newButton.classList.add('remove'); 
+
+                // TBD - this does not work
+                const newSvg = document.createElementNS("http://www.w3.org/2000/svg", "img");
+                newSvg.setAttributeNS('http://www.w3.org/1999/xlink', 'src', 'drag-handle-horizontal.svg');
 
                 newItem.textContent = selectedText + "  ";
                 newItem.appendChild(newButton);
@@ -159,6 +160,8 @@
                 initSortableList(document.getElementById("sortableList"));
             }
         });
+
+        // TBD - Add event listener to the current buttons
 
 
         </script>
