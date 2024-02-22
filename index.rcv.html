@@ -70,7 +70,7 @@
         // script.js
         const firstList = document.getElementById('firstList');
         const sortableList = document.getElementById('sortableList');
-        const toRemoveButtons = document.getElementsByClassName("remove");
+        const removeButtons = document.getElementsByClassName("remove");
 
         // Make the RCV selection sortable by drag-and-drop
         function initSortableList(target) {
@@ -145,6 +145,17 @@
                 const newButton = document.createElement('button');
                 newButton.innerText = 'remove';
                 newButton.classList.add('remove'); 
+                // add an event listener to the button
+                newButton.addEventListener("click", function (e) {
+                    var itemName = e.target.parentNode.textContent.trim().replace(/ remove$/, "");;
+                    console.log("removing:", itemName);
+                    // remove it from sortableList
+                    e.target.parentNode.remove();
+                    // add to firstList
+                    const listItem = document.createElement('li');
+                    listItem.textContent = itemName;
+                    firstList.appendChild(listItem);
+                });
 
                 // Create a re-order glyph
                 const svgIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -175,9 +186,6 @@
                 initSortableList(document.getElementById("sortableList"));
             }
         });
-
-        // TBD - Add event listener to the current buttons
-
 
         </script>
     </body>
