@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    /* Set the overall styles for the bar */
+    #horizontalBar {
+        display: flex;
+        height: 20px; /* Adjust the height as needed */
+        width: 100%; /* Fills the entire width of the page */
+    }
+
+    /* Define the individual sections with different colors and black borders */
+    .section1, .section2, .section3, .section4, .section5 {
+        flex: 1; /* Equal distribution of space */
+        border: 1px solid black; /* Add a black border */
+    }
+
+    .section1 {
+        background-color: #FF5733; /* Orange color */
+    }
+
+    .section2 {
+        background-color: #3498DB; /* Blue color */
+    }
+
+    .section3 {
+        background-color: #27AE60; /* Green color */
+    }
+
+    .section4 {
+        flex: 1;
+        background-color: #E74C3C; /* Red color */
+    }
+
+    .section5 {
+        flex: 1;
+        background-color: #9B59B6; /* Purple color */
+    }
+    /* Initial background color for the words */
+    .word {
+        background-color: white;
+        padding: 5px;
+        margin: 5px;
+    }
+    </style>
+</head>
+<body>
+    <p>here</p>
+    <div id="horizontalBar">
+        <div class="section1"></div>
+        <div class="section2"></div>
+        <div class="section3"></div>
+        <div class="section4"></div>
+        <div class="section5"></div>
+    </div>
+
+    <p>there</p>
+
+    <!-- Five words in a line -->
+    <div class="word" id="word1">Apple</div>
+    <div class="word" id="word2">Banana</div>
+    <div class="word" id="word3">Cherry</div>
+    <div class="word" id="word4">Date</div>
+    <div class="word" id="word5">Fig</div>
+
+    <!-- Five buttons elsewhere -->
+    <button onclick="changeColor('word1')">Apple</button>
+    <button onclick="changeColor('word2')">Banana</button>
+    <button onclick="changeColor('word3')">Cherry</button>
+    <button onclick="changeColor('word4')">Date</button>
+    <button onclick="changeColor('word5')">Fig</button>
+
+    <script>
+        function changeColor(wordId) {
+            const wordElement = document.getElementById(wordId);
+            wordElement.style.backgroundColor = 'gray';
+        }
+    </script>
+</body>
+</html>

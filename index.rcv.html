@@ -5,19 +5,35 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Ordered List Example</title>
         <style>
-        /*
+        /* box debugging
          * {
 	   border-style: solid;
 	   border-color: red;
            }
          */
-        /* styles.css */
+
+        /* Set the overall styles for the progress bar */
+        #progressBar {
+            display: flex;
+            height: 20px; /* Adjust the height as needed */
+            width: 100%; /* Fills the entire width of the page */
+            text-align: center;
+        }
+
+        /* Each section (class) gets an individual black border */
+        .barSection {
+            flex: 1; /* Equal distribution of space */
+            border: 1px solid black; /* Add a black border */
+        }
+
+        /* in RCV the selection is a sortable list - the defaults */
         #sortableList {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-        
+
+        /* the incoming choices */
         #firstList li {
             margin: 10px;
             padding: 15px;
@@ -46,10 +62,36 @@
         </style>
     </head>
     <body>
-        <p>
-            <img src="drag-handle-horizontal.svg">
-        </p>
-            <h2>A RCV (IRV) contest:</h2>
+        <!--
+             Note - each contest is effectively a separate page.  The contest next button (there
+             are several ways to get to the next, previous, or random other contest) resets
+             the two lists to the current state of the (new) contest.
+
+             Note that contests can be in one of three states: un-voted, undervoted, or
+             voted.  The progress bar is divided into the contest number of sections, each
+             section from left to rigth representing a contest.  The coloring is as follows:
+
+             green     -> voted (completed)
+             yellow    -> undervoted
+             red       -> there are two cases when a progress bar section is red: a) when the
+                          contest is unvoted when there is a yellow or green contest to the
+                          right, or b) when the voter is on the checkout/cast-vote final page
+             uncolored -> unvoted when there are no yellows/greens to the right and when the
+                          voter is not on the final checkout/cast page
+
+             For now, just stub out five contests and pretend this is the first one being
+             being revisted after skipping the first two and completing the third one
+        -->
+        <div id="progressBar">
+            <div class="barSection" id="contest1">1</div>
+            <div class="barSection" id="contest2">2</div>
+            <div class="barSection" id="contest3">3</div>
+            <div class="barSection" id="contest4">4</div>
+            <div class="barSection" id="contest5">5</div>
+        </div>
+        <p>Progress bar per contest</p>
+
+        <h2>A RCV (IRV) contest:</h2>
         <ul>
             <li>Clicking a candidate will add it to your RCV</li>
             <li>Your RCV selection is re-orderable by drag-and-drop</li>
@@ -71,6 +113,17 @@
         const firstList = document.getElementById('firstList');
         const sortableList = document.getElementById('sortableList');
         const removeButtons = document.getElementsByClassName("remove");
+
+        // set the color of the progress bar section
+        function changeColor(sectionId, color) {
+            const sectionElement = document.getElementById(sectionId);
+            sectionElement.style.backgroundColor = color;
+        }
+
+        // Hardcoded as an example
+        changeColor('contest1', '#e6e22e')
+        changeColor('contest2', '#e64747')
+        changeColor('contest3', '#8fb935')
 
         // Make the RCV selection sortable by drag-and-drop
         function initSortableList(target) {
