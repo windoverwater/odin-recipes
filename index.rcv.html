@@ -10,20 +10,30 @@
 	   border-style: solid;
 	   border-color: red;
            }
-         */
+           */
 
         /* Set the overall styles for the progress bar */
         #progressBar {
             display: flex;
-            height: 20px; /* Adjust the height as needed */
-            width: 100%; /* Fills the entire width of the page */
+            height: 20px;
+            width: 100%;
+            text-align: center;
+            background-color: #E5E4E2;
+        }
+        #youAreHereBar {
+            display: flex;
+            height: 20px;
+            width: 100%;
             text-align: center;
         }
 
         /* Each section (class) gets an individual black border */
         .barSection {
             flex: 1; /* Equal distribution of space */
-            border: 1px solid black; /* Add a black border */
+            border-right: 1px solid black;
+        }
+        .yrhSection {
+            flex: 1; /* Equal distribution of space */
         }
 
         /* in RCV the selection is a sortable list - the defaults */
@@ -83,11 +93,22 @@
              being revisted after skipping the first two and completing the third one
         -->
         <div id="progressBar">
+            <div class="barSection" id="welcome">Welcome</div>
             <div class="barSection" id="contest1">1</div>
             <div class="barSection" id="contest2">2</div>
             <div class="barSection" id="contest3">3</div>
             <div class="barSection" id="contest4">4</div>
             <div class="barSection" id="contest5">5</div>
+            <div class="barSection" id="checkout">Checkout</div>
+        </div>
+        <div id="youAreHereBar">
+            <div class="yrhSection" id="prog0"></div>
+            <div class="yrhSection" id="prog1"></div>
+            <div class="yrhSection" id="prog2"></div>
+            <div class="yrhSection" id="prog3"></div>
+            <div class="yrhSection" id="prog4"></div>
+            <div class="yrhSection" id="prog5"></div>
+            <div class="yrhSection" id="prog6"></div>
         </div>
         <p>Progress bar per contest</p>
 
@@ -115,15 +136,32 @@
         const removeButtons = document.getElementsByClassName("remove");
 
         // set the color of the progress bar section
-        function changeColor(sectionId, color) {
+        function setBarColor(sectionId, color) {
             const sectionElement = document.getElementById(sectionId);
             sectionElement.style.backgroundColor = color;
         }
 
+        // set the contents of the youAreHereBar
+        // Define a YouAreThere inline glyph
+        const yrhIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        yrhIcon.setAttribute("width", "30");
+        yrhIcon.setAttribute("height", "30");
+        yrhIcon.setAttribute("fill", "currentColor");
+        yrhIcon.innerHTML = `<path d="M26.221 16c0-7.243-5.871-13.113-13.113-13.113s-13.113 5.87-13.113 13.113c0 7.242 5.871 13.113 13.113 13.113s13.113-5.871 13.113-13.113zM1.045 16c0-6.652 5.412-12.064 12.064-12.064s12.064 5.412 12.064 12.064c0 6.652-5.411 12.064-12.064 12.064-6.652 0-12.064-5.412-12.064-12.064z"></path><path d="M18.746 15.204l0.742-0.742-6.379-6.379-6.378 6.379 0.742 0.742 5.112-5.112v12.727h1.049v-12.727z"></path>`;
+        function setActiveContest(sectionId) {
+            const sectionElement = document.getElementById(sectionId);
+            const newElement = document.createElement("span");
+            newElement.appendChild(yrhIcon);
+            sectionElement.appendChild(newElement);
+        }
+
         // Hardcoded as an example
-        changeColor('contest1', '#e6e22e')
-        changeColor('contest2', '#e64747')
-        changeColor('contest3', '#8fb935')
+        setBarColor('welcome', '#8fb935')
+        setBarColor('contest1', '#e6e22e')
+        setBarColor('contest2', '#e64747')
+        setBarColor('contest3', '#8fb935')
+        // ... and place the youarethere glyph there as well
+        setActiveContest('prog1')
 
         // Make the RCV selection sortable by drag-and-drop
         function initSortableList(target) {
