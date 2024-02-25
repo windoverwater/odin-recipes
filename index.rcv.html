@@ -3,7 +3,9 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Ordered List Example</title>
+        <link rel="stylesheet" href="stylesheets/voting.css">
+        <script src="blank-ballot.js"></script>
+        <title>Voting - User Story 2</title>
         <style>
         /* box debugging
          * {
@@ -11,64 +13,6 @@
 	   border-color: red;
            }
            */
-
-        /* Set the overall styles for the progress bar */
-        #progressBar {
-            display: flex;
-            height: 20px;
-            width: 100%;
-            text-align: center;
-            background-color: #E5E4E2;
-        }
-        #youAreHereBar {
-            display: flex;
-            height: 20px;
-            width: 100%;
-            text-align: center;
-        }
-
-        /* Each section (class) gets an individual black border */
-        .barSection {
-            flex: 1; /* Equal distribution of space */
-            border-right: 1px solid black;
-        }
-        .yrhSection {
-            flex: 1; /* Equal distribution of space */
-        }
-
-        /* in RCV the selection is a sortable list - the defaults */
-        #sortableList {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        /* the incoming choices */
-        #firstList li {
-            margin: 10px;
-            padding: 15px;
-            border: 1px solid #dfdfdf;
-            background: #f5f5f5;
-            list-style-type: none;
-        }
-
-        #sortableList li {
-            margin: 10px;
-            padding: 15px;
-            border: 1px solid #dfdfdf;
-            background: #f5f5f5;
-        }
-
-        #sortableList li.hint {
-            border: 1px solid #ffc49a;
-            background: #feffb4;
-        }
-
-        #sortableList li.active {
-            border: 1px solid #ffa5a5;
-            background: #ffe7e7;
-        }
-
         </style>
     </head>
     <body>
@@ -129,18 +73,22 @@
         </ol>
 
         <script>
-        // script.js
+        // Create the javascript object from the JSON object literal (a.k.a. string)
+        let blankBallot = null;
+        try {
+            blankBallot = JSON.parse(blankBallotJSON);
+        } catch (e) {
+            console.error(e);
+        }
+        // Get the number of contests from blankBallot
+        const contests = Object.keys(blankBallot.contests).length;
+        console.log("there are " + contests + " contest(s)");
+
+        // For RCV, the choice and selection lists and remove (from selection) button
         const firstList = document.getElementById('firstList');
         const sortableList = document.getElementById('sortableList');
         const removeButtons = document.getElementsByClassName("remove");
 
-        // set the color of the progress bar section
-        function setBarColor(sectionId, color) {
-            const sectionElement = document.getElementById(sectionId);
-            sectionElement.style.backgroundColor = color;
-        }
-
-        // set the contents of the youAreHereBar
         // Define a YouAreThere inline glyph
         const yrhIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         yrhIcon.setAttribute("width", "18");
@@ -148,6 +96,14 @@
         yrhIcon.setAttribute("viewBox", "0 0 32 32");
         yrhIcon.setAttribute("fill", "currentColor");
         yrhIcon.innerHTML = `<path d="M26.221 16c0-7.243-5.871-13.113-13.113-13.113s-13.113 5.87-13.113 13.113c0 7.242 5.871 13.113 13.113 13.113s13.113-5.871 13.113-13.113zM1.045 16c0-6.652 5.412-12.064 12.064-12.064s12.064 5.412 12.064 12.064c0 6.652-5.411 12.064-12.064 12.064-6.652 0-12.064-5.412-12.064-12.064z"></path><path d="M18.746 15.204l0.742-0.742-6.379-6.379-6.378 6.379 0.742 0.742 5.112-5.112v12.727h1.049v-12.727z"></path>`;
+
+        // Set the color of the progress bar (per section)
+        function setBarColor(sectionId, color) {
+            const sectionElement = document.getElementById(sectionId);
+            sectionElement.style.backgroundColor = color;
+        }
+
+        // Set the contents of the youAreHereBar bar (per section)
         function setActiveContest(sectionId) {
             const sectionElement = document.getElementById(sectionId);
             const newElement = document.createElement("span");
