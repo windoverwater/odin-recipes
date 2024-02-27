@@ -22,6 +22,11 @@
     flex: 1; /* Equal distribution of space */
 }
 
+/* when a plurality candidate is selected */
+.selected {
+    background-color: #f0f0f0;
+}
+
 /* in RCV the selection is a sortable list - the defaults */
 #sortableList {
     list-style: none;

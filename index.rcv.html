@@ -130,35 +130,36 @@
 
         // Will set up the upperSection
         function setUpperSection(contestType, maxSelection) {
-            const headerElement = document.getElementById("upperSection");
+            const rootElement = document.getElementById("upperSection");
             const newItem = document.createElement('span');
             if (contestType == "plurality") {
-                newItem.innerHTML = `<h2>A plurality contest:</h2><ul><li>Make you selection by clicking.  Click again to unselect.</li>`;
+                let innerText = "<h2>A plurality contest:</h2><ul><li>Make you selection by clicking.  Click again to unselect.</li>";
                 if (maxSelection == 1) {
-                    newItem.insertAdjacentHTML('beforeend', `<li>You can only make one selection</li>`);
+                    innerText += "<li>You can only make one selection</li></ul>";
                 } else {
-                    newItem.insertAdjacentHTML('beforeend', `<li>You can choose upto ${maxSelection}</li>`);
+                    innerText += "<li>You can choose upto " + maxSelection + "</li></ul>";
                 }
-                newItem.insertAdjacentHTML('beforeend', `</ul><h2>Your selection:</h2>`);
+                newItem.innerHTML = innerText;
             } else {
-                newItem.innerHTML = `<h2>A RCV (IRV) contest:</h2>
-<ul>
-<li>Clicking a candidate will add it to your RCV</li>
-<li>Your RCV selection is re-orderable by drag-and-drop</li>
-<li>Clicking a selection's remove button un-selects a candidate</li>
-</ul>
-<h2>Your RCV selection:</h2>
+                innerText = `<h2>A RCV (IRV) contest:</h2>
+                <ul>
+                <li>Clicking a candidate will add it to your RCV</li>
+                <li>Your RCV selection is re-orderable by drag-and-drop</li>
+                <li>Clicking a selection's remove button un-selects a candidate</li>
+                </ul>
+                <h2>Your RCV selection:</h2>
                 `;
-                const newList = document.createElement('ol');
-                newList.setAttribute("id", "sortableList");
-                newItem.appendChild(newList);
+                newItem.innerHTML = innerText;
             }
-            headerElement.appendChild(newItem);
+            const newList = document.createElement('ol');
+            newList.setAttribute("id", "sortableList");
+            newItem.appendChild(newList);
+            rootElement.appendChild(newItem);
         }
 
         // Will set up the lowerSection
         function setLowerSection(choiceType) {
-            const headerElement = document.getElementById("upperSection");
+            const rootElement = document.getElementById("upperSection");
             const newItem = document.createElement('span');
             if (choiceType == "ticket") {
                 newItem.innerHTML = '<h2>Candidates:</h2>';
@@ -170,7 +171,26 @@
             const newList = document.createElement('ul');
             newList.setAttribute("id", "choiceList");
             newItem.appendChild(newList);
-            headerElement.appendChild(newItem);
+            rootElement.appendChild(newItem);
+        }
+
+        // Setup the choiceList
+        function setupChoiceList(choices, choiceType, ticketTitles) {
+            const rootElement = document.getElementById("choiceList");
+            for (let choice of choices) {
+                const newItem = document.createElement('li');
+                newItem.innerHTML = choice.name;
+                if (choiceType == "ticket") {
+                    // Note - need to add this as an additional flex-box
+                    // so that the 'name' matches the choice
+                    let addendum = [];
+                    for (let office of ticketTitles) {
+                        addendum.push(office + ":" + choice.ticket_names);
+                    }
+                    newItem.insertAdjacentHTML('beforeend', "&nbsp&nbsp&nbsp[" + addendum.join(", ") + "]");
+                }
+                rootElement.appendChild(newItem);
+            }
         }
 
         // Make the RCV selection sortable by drag-and-drop
@@ -234,84 +254,120 @@
             }
         }
 
+        // RCV event listeners
+        function setupRCVEventListeners() {
+            // Event listener for selection in the first list (when a candidate is selected)
+            choiceList.addEventListener('click', (event) => {
+                if (event.target.tagName === 'LI') {
+                    // Create a new selected item with a remove button
+                    const selectedText = event.target.textContent;
+                    const newItem = document.createElement('li');
+                    newItem.classList.add("flex-item"); // Apply a class for styling
+
+                    // Create a remove button
+                    const newButton = document.createElement('button');
+                    newButton.innerText = 'remove';
+                    newButton.classList.add('remove');
+                    // add an event listener to the button
+                    newButton.addEventListener("click", function (e) {
+                        var itemName = e.target.parentNode.textContent.trim().replace(/ remove$/, "");;
+                        console.log("removing:", itemName);
+                        // remove it from sortableList
+                        e.target.parentNode.remove();
+                        // add to choiceList
+                        const listItem = document.createElement('li');
+                        listItem.textContent = itemName;
+                        choiceList.appendChild(listItem);
+                    });
+
+                    // Create a re-order glyph
+                    const svgIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                    svgIcon.setAttribute("width", "20");
+                    svgIcon.setAttribute("height", "20");
+                    svgIcon.setAttribute("viewBox", "0 -4 16 16");
+                    // svgIcon.setAttribute("preserveAspectRatio", "xMidYMid meet");
+                    svgIcon.setAttribute("fill", "currentColor");
+                    svgIcon.setAttribute("fill-rule", "evenodd");
+                    svgIcon.setAttribute("clip-rule", "evenodd");
+                    // the actual svg
+                    svgIcon.innerHTML = `<path d="M2.49998 4.09998C2.27906 4.09998 2.09998 4.27906 2.09998 4.49998C2.09998 4.72089 2.27906 4.89998 2.49998 4.89998H12.5C12.7209 4.89998 12.9 4.72089 12.9 4.49998C12.9 4.27906 12.7209 4.09998 12.5 4.09998H2.49998ZM2.49998 6.09998C2.27906 6.09998 2.09998 6.27906 2.09998 6.49998C2.09998 6.72089 2.27906 6.89998 2.49998 6.89998H12.5C12.7209 6.89998 12.9 6.72089 12.9 6.49998C12.9 6.27906 12.7209 6.09998 12.5 6.09998H2.49998ZM2.09998 8.49998C2.09998 8.27906 2.27906 8.09998 2.49998 8.09998H12.5C12.7209 8.09998 12.9 8.27906 12.9 8.49998C12.9 8.72089 12.7209 8.89998 12.5 8.89998H2.49998C2.27906 8.89998 2.09998 8.72089 2.09998 8.49998ZM2.49998 10.1C2.27906 10.1 2.09998 10.2791 2.09998 10.5C2.09998 10.7209 2.27906 10.9 2.49998 10.9H12.5C12.7209 10.9 12.9 10.7209 12.9 10.5C12.9 10.2791 12.7209 10.1 12.5 10.1H2.49998Z"/>`;
+
+                    // Create the text element
+                    const textElement = document.createElement("span");
+                    textElement.textContent = selectedText + "  ";
+
+                    // Append everything ...
+                    newItem.appendChild(svgIcon);
+                    newItem.appendChild(textElement);
+                    newItem.appendChild(newButton);
+                    // ... and append that to the bottom of sortableList
+                    sortableList.appendChild(newItem);
+
+                    // Remove the selected item from the first list
+                    event.target.remove();
+
+                    // Initialize the sortable list
+                    initSortableList(document.getElementById("sortableList"));
+                }
+            });
+        }
+
+        // plurality event listeners
+        function setupPluralityEventListeners(maxCount) {
+            choiceList.addEventListener("click", (event) => {
+                const listItem = event.target;
+                const itemText = listItem.textContent;
+                const itemIndex = Array.from(choiceList.children).indexOf(listItem);
+                let selectedCount = 0;
+                if (listItem.tagName === "LI") {
+                    if (listItem.classList.contains("selected")) {
+                        // Deselect the item
+                        listItem.classList.remove("selected");
+                        selectedCount--;
+                        console.log("de-selected " + itemIndex + ", " + itemText);
+                    } else if (selectedCount < maxCount) {
+                        // Select the item (up to maxSelection selections allowed)
+                        listItem.classList.add("selected");
+                        selectedCount++;
+                        console.log("selected " + itemIndex + ", " + itemText);
+                    } else {
+                        // Overvote
+                        console.log("rejected (overvote) - ignoring " + itemIndex + ", " + itemText);
+                    }
+                }
+            });
+        }
+
         // If here, this is the first contest
         var thisContest = 0;
+        var thisContestName = Object.keys(listOfContests[thisContest])[0];
+        var thisContestValue = Object.values(listOfContests[thisContest])[0];
         // set up the bars
         setupProgressBars(numberOfContests);
         // and initialize them
         setProgressBarColor(thisContest, '#D5F5E3');
         setActiveContest(thisContest);
 
-        // Contest type - currently only plurality or rcv are support
-        var contestType = listOfContests[thisContest].tally;
-        var maxSelection = listOfContests[thisContest].max;
-        var choiceType = listOfContests[thisContest].contest_type;
-        setUpperSection(contestType, maxSelection);
+        // Setup the upper and lower sections
+        var contestType = thisContestValue.tally;
+        var choiceType = thisContestValue.contest_type;
+        setUpperSection(contestType, thisContestValue.max);
         setLowerSection(choiceType);
         
-        // For RCV, the choice and selection lists and remove (from selection) button
-        const choiceList = document.getElementById('choiceList');
-        const sortableList = document.getElementById('sortableList');
-        const removeButtons = document.getElementsByClassName("remove");
+        // Note - for the moment let these be globals (until we know more).
+        // Regardless, the upper/lower setup will make sure choiceList and
+        // sortableList are already defined.
+        var choiceList = document.getElementById('choiceList');
+        var sortableList = document.getElementById('sortableList');
+        var removeButtons = document.getElementsByClassName("remove");
 
-        //////////////////
-        // event listeners
-        //////////////////
-
-        // Event listener for selection in the first list (when a candidate is selected)
-        choiceList.addEventListener('click', (event) => {
-            if (event.target.tagName === 'LI') {
-                // Create a new selected item with a remove button
-                const selectedText = event.target.textContent;
-                const newItem = document.createElement('li');
-                newItem.classList.add("flex-item"); // Apply a class for styling
-
-                // Create a remove button
-                const newButton = document.createElement('button');
-                newButton.innerText = 'remove';
-                newButton.classList.add('remove'); 
-                // add an event listener to the button
-                newButton.addEventListener("click", function (e) {
-                    var itemName = e.target.parentNode.textContent.trim().replace(/ remove$/, "");;
-                    console.log("removing:", itemName);
-                    // remove it from sortableList
-                    e.target.parentNode.remove();
-                    // add to firstList
-                    const listItem = document.createElement('li');
-                    listItem.textContent = itemName;
-                    firstList.appendChild(listItem);
-                });
-
-                // Create a re-order glyph
-                const svgIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                svgIcon.setAttribute("width", "20");
-                svgIcon.setAttribute("height", "20");
-                svgIcon.setAttribute("viewBox", "0 -4 16 16");
-                // svgIcon.setAttribute("preserveAspectRatio", "xMidYMid meet");
-                svgIcon.setAttribute("fill", "currentColor");
-                svgIcon.setAttribute("fill-rule", "evenodd");
-                svgIcon.setAttribute("clip-rule", "evenodd");
-                // the actual svg
-                svgIcon.innerHTML = `<path d="M2.49998 4.09998C2.27906 4.09998 2.09998 4.27906 2.09998 4.49998C2.09998 4.72089 2.27906 4.89998 2.49998 4.89998H12.5C12.7209 4.89998 12.9 4.72089 12.9 4.49998C12.9 4.27906 12.7209 4.09998 12.5 4.09998H2.49998ZM2.49998 6.09998C2.27906 6.09998 2.09998 6.27906 2.09998 6.49998C2.09998 6.72089 2.27906 6.89998 2.49998 6.89998H12.5C12.7209 6.89998 12.9 6.72089 12.9 6.49998C12.9 6.27906 12.7209 6.09998 12.5 6.09998H2.49998ZM2.09998 8.49998C2.09998 8.27906 2.27906 8.09998 2.49998 8.09998H12.5C12.7209 8.09998 12.9 8.27906 12.9 8.49998C12.9 8.72089 12.7209 8.89998 12.5 8.89998H2.49998C2.27906 8.89998 2.09998 8.72089 2.09998 8.49998ZM2.49998 10.1C2.27906 10.1 2.09998 10.2791 2.09998 10.5C2.09998 10.7209 2.27906 10.9 2.49998 10.9H12.5C12.7209 10.9 12.9 10.7209 12.9 10.5C12.9 10.2791 12.7209 10.1 12.5 10.1H2.49998Z"/>`;
-
-                // Create the text element
-                const textElement = document.createElement("span");
-                textElement.textContent = selectedText + "  ";
-
-                // Append everything ...
-                newItem.appendChild(svgIcon);
-                newItem.appendChild(textElement);
-                newItem.appendChild(newButton);
-                // ... and append that to the bottom of sortableList
-                sortableList.appendChild(newItem);
-
-                // Remove the selected item from the first list
-                event.target.remove();
-
-                // Initialize the sortable list
-                initSortableList(document.getElementById("sortableList"));
-            }
-        });
+        // Setup the choiceList regardless of contest type
+        setupChoiceList(thisContestValue.choices, choiceType, thisContestValue.ticket_offices);
+        if (contestType == "plurality") {
+            setupPluralityEventListeners(thisContestValue.max);
+        } else {
+            setupRCVEventListeners();
+        }
 
 
         </script>
