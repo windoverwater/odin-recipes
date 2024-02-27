@@ -14,7 +14,7 @@
 }
 
 /* Each section (class) gets an individual black border */
-.barSection {
+.progSection {
     flex: 1; /* Equal distribution of space */
     border-right: 1px solid black;
 }
@@ -30,7 +30,7 @@
 }
 
 /* the incoming choices */
-#firstList li {
+#choiceList li {
     margin: 10px;
     padding: 15px;
     border: 1px solid #dfdfdf;

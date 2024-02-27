@@ -36,58 +36,56 @@
              For now, just stub out five contests and pretend this is the first one being
              being revisted after skipping the first two and completing the third one
         -->
-        <div id="progressBar">
-            <div class="barSection" id="contest1">1</div>
-            <div class="barSection" id="contest2">2</div>
-            <div class="barSection" id="contest3">3</div>
-            <div class="barSection" id="contest4">4</div>
-            <div class="barSection" id="contest5">5</div>
-            <!-- the last section of the progress bar should have no borders  -->
-            <div class="yrhSection" id="checkout">Checkout</div>
+        <div id="progressBar"></div>
+        <div id="youAreHereBar"></div>
+
+        <p>Progress bar per contest and current contest</p>
+
+        <!-- The upper span starts here -->
+        <div id="upperSection">
+            <h2>A RCV (IRV) contest:</h2>
+            <ul>
+                <li>Clicking a candidate will add it to your RCV</li>
+                <li>Your RCV selection is re-orderable by drag-and-drop</li>
+                <li>Clicking a selection's remove button un-selects a candidate</li>
+            </ul>
+
+            <h2>Your RCV selection:</h2>
+            <ol id="sortableList"></ol>
         </div>
-        <div id="youAreHereBar">
-            <div class="yrhSection" id="prog1"></div>
-            <div class="yrhSection" id="prog2"></div>
-            <div class="yrhSection" id="prog3"></div>
-            <div class="yrhSection" id="prog4"></div>
-            <div class="yrhSection" id="prog5"></div>
-            <div class="yrhSection" id="prog6"></div>
+
+        <!-- The lower span start here -->
+        <div id="lowerSection">
+            <h2>Candidates:</h2>
+            <ul id="choiceList"></ul>
         </div>
-        <p>Progress bar per contest</p>
 
-        <h2>A RCV (IRV) contest:</h2>
-        <ul>
-            <li>Clicking a candidate will add it to your RCV</li>
-            <li>Your RCV selection is re-orderable by drag-and-drop</li>
-            <li>Clicking a selection's remove button un-selects a candidate</li>
-        </ul>
-
-        <h2>Your RCV selection:</h2>
-        <ol id="sortableList"></ol>
-
-        <h2>Candidates:</h2>
-        <ul id="firstList">
-            <li>Apple</li>
-            <li>Banana</li>
-            <li>Cherry</li>
-        </ol>
-
+        <!-- -->
+        <!-- html ends, javascript starts -->
+        <!-- -->
         <script>
-        // Create the javascript object from the JSON object literal (a.k.a. string)
-        let blankBallot = null;
+
+        // Need the JSON data for just about everything
+        // Create the blankBallot javascript object from the blankBallotJSON JSON object literal
+        var blankBallot = null;
         try {
             blankBallot = JSON.parse(blankBallotJSON);
         } catch (e) {
             console.error(e);
         }
-        // Get the number of contests from blankBallot
-        const contests = Object.keys(blankBallot.contests).length;
-        console.log("there are " + contests + " contest(s)");
 
-        // For RCV, the choice and selection lists and remove (from selection) button
-        const firstList = document.getElementById('firstList');
-        const sortableList = document.getElementById('sortableList');
-        const removeButtons = document.getElementsByClassName("remove");
+        // Get the number of contests which is actually ordered/subdivided by GGO
+        var numberOfContests = 0;
+        const listOfContests = [];
+        for (const ggo of blankBallot.active_ggos) {
+            if (blankBallot.contests[ggo]) {
+                for (const contest of blankBallot.contests[ggo]) {
+                    listOfContests[numberOfContests] = contest;
+                    numberOfContests += 1;
+                }
+            }
+        }
+        console.log("there are " + numberOfContests + " contest(s)");
 
         // Define a YouAreThere inline glyph
         const yrhIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -97,26 +95,45 @@
         yrhIcon.setAttribute("fill", "currentColor");
         yrhIcon.innerHTML = `<path d="M26.221 16c0-7.243-5.871-13.113-13.113-13.113s-13.113 5.87-13.113 13.113c0 7.242 5.871 13.113 13.113 13.113s13.113-5.871 13.113-13.113zM1.045 16c0-6.652 5.412-12.064 12.064-12.064s12.064 5.412 12.064 12.064c0 6.652-5.411 12.064-12.064 12.064-6.652 0-12.064-5.412-12.064-12.064z"></path><path d="M18.746 15.204l0.742-0.742-6.379-6.379-6.378 6.379 0.742 0.742 5.112-5.112v12.727h1.049v-12.727z"></path>`;
 
-        // Set the color of the progress bar (per section)
-        function setBarColor(sectionId, color) {
-            const sectionElement = document.getElementById(sectionId);
+        // Will set up the progress bars with numberOfContests contests
+        function setupProgressBars(numberOfContests) {
+            const progBarElement = document.getElementById("progressBar");
+            const yrhBarElement = document.getElementById("youAreHereBar");
+            for (let contest = 0; contest < numberOfContests; contest++) {
+                const id = contest + 1;
+                // progress bar
+                const newBarElement = document.createElement("div");
+                // Note - the last progress bar section wants to the same class
+                // as the other so not to have any borders
+                if (contest == numberOfContests - 1) {
+                    newBarElement.setAttribute("class", "yrhSection");
+                } else {
+                    newBarElement.setAttribute("class", "progSection");
+                }
+                newBarElement.setAttribute("id", "progBar" + contest);
+                newBarElement.innerHTML = id;
+                progBarElement.appendChild(newBarElement);
+                // youAreHereBar bar
+                const newYrhElement = document.createElement("div");
+                newYrhElement.setAttribute("class", "yrhSection");
+                newYrhElement.setAttribute("id", "yrhBar" + contest);
+                yrhBarElement.appendChild(newYrhElement);
+            }
+        }
+
+        // Will set the color of the progress bar (per contest)
+        function setProgressBarColor(contestNum, color) {
+            const sectionElement = document.getElementById("progBar" + contestNum);
             sectionElement.style.backgroundColor = color;
         }
 
-        // Set the contents of the youAreHereBar bar (per section)
-        function setActiveContest(sectionId) {
-            const sectionElement = document.getElementById(sectionId);
+        // Will set the contents of the youAreHereBar bar (per contest)
+        function setActiveContest(contestNum) {
+            const sectionElement = document.getElementById("yrhBar" + contestNum);
             const newElement = document.createElement("span");
             newElement.appendChild(yrhIcon);
             sectionElement.appendChild(newElement);
         }
-
-        // Hardcoded as an example
-        setBarColor('contest1', '#e6e22e')
-        setBarColor('contest2', '#e64747')
-        setBarColor('contest3', '#8fb935')
-        // ... and place the youarethere glyph there as well
-        setActiveContest('prog1')
 
         // Make the RCV selection sortable by drag-and-drop
         function initSortableList(target) {
@@ -179,8 +196,30 @@
             }
         }
 
+        // If here, this is the first contest
+        var thisContest = 0;
+        // set up the bars
+        setupProgressBars(numberOfContests);
+        // and initialize them
+        setProgressBarColor(thisContest, '#D5F5E3');
+        setActiveContest(thisContest);
+
+        // Contest type - currently only plurality or rcv are support
+        var contestType = listOfContests[thisContest].tally;
+
+        // Loop over the contests and modify the DOM accordingly.
+        
+        // For RCV, the choice and selection lists and remove (from selection) button
+        const choiceList = document.getElementById('choiceList');
+        const sortableList = document.getElementById('sortableList');
+        const removeButtons = document.getElementsByClassName("remove");
+
+        //////////////////
+        // event listeners
+        //////////////////
+
         // Event listener for selection in the first list (when a candidate is selected)
-        firstList.addEventListener('click', (event) => {
+        choiceList.addEventListener('click', (event) => {
             if (event.target.tagName === 'LI') {
                 // Create a new selected item with a remove button
                 const selectedText = event.target.textContent;
@@ -233,6 +272,7 @@
                 initSortableList(document.getElementById("sortableList"));
             }
         });
+
 
         </script>
     </body>
