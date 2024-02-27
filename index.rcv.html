@@ -41,24 +41,17 @@
 
         <p>Progress bar per contest and current contest</p>
 
-        <!-- The upper span starts here -->
-        <div id="upperSection">
-            <h2>A RCV (IRV) contest:</h2>
-            <ul>
-                <li>Clicking a candidate will add it to your RCV</li>
-                <li>Your RCV selection is re-orderable by drag-and-drop</li>
-                <li>Clicking a selection's remove button un-selects a candidate</li>
-            </ul>
+        <!-- The upper span starts here
+             Note - when exiting a contest page, all child nodes of upperSection
+             will be wiped out.
+        -->
+        <div id="upperSection"></div>
 
-            <h2>Your RCV selection:</h2>
-            <ol id="sortableList"></ol>
-        </div>
-
-        <!-- The lower span start here -->
-        <div id="lowerSection">
-            <h2>Candidates:</h2>
-            <ul id="choiceList"></ul>
-        </div>
+        <!-- The lower span start here.
+             Note - when exiting a contest page, all child nodes of lowerSection
+             will be wiped out.
+        -->
+        <div id="lowerSection"></div>
 
         <!-- -->
         <!-- html ends, javascript starts -->
@@ -135,6 +128,51 @@
             sectionElement.appendChild(newElement);
         }
 
+        // Will set up the upperSection
+        function setUpperSection(contestType, maxSelection) {
+            const headerElement = document.getElementById("upperSection");
+            const newItem = document.createElement('span');
+            if (contestType == "plurality") {
+                newItem.innerHTML = `<h2>A plurality contest:</h2><ul><li>Make you selection by clicking.  Click again to unselect.</li>`;
+                if (maxSelection == 1) {
+                    newItem.insertAdjacentHTML('beforeend', `<li>You can only make one selection</li>`);
+                } else {
+                    newItem.insertAdjacentHTML('beforeend', `<li>You can choose upto ${maxSelection}</li>`);
+                }
+                newItem.insertAdjacentHTML('beforeend', `</ul><h2>Your selection:</h2>`);
+            } else {
+                newItem.innerHTML = `<h2>A RCV (IRV) contest:</h2>
+<ul>
+<li>Clicking a candidate will add it to your RCV</li>
+<li>Your RCV selection is re-orderable by drag-and-drop</li>
+<li>Clicking a selection's remove button un-selects a candidate</li>
+</ul>
+<h2>Your RCV selection:</h2>
+                `;
+                const newList = document.createElement('ol');
+                newList.setAttribute("id", "sortableList");
+                newItem.appendChild(newList);
+            }
+            headerElement.appendChild(newItem);
+        }
+
+        // Will set up the lowerSection
+        function setLowerSection(choiceType) {
+            const headerElement = document.getElementById("upperSection");
+            const newItem = document.createElement('span');
+            if (choiceType == "ticket") {
+                newItem.innerHTML = '<h2>Candidates:</h2>';
+            } else if (choiceType == "question") {
+                newItem.innerHTML = '<h2>Your selection:</h2>';
+            } else {
+                newItem.innerHTML = '<h2>Candidates:</h2>';
+            }
+            const newList = document.createElement('ul');
+            newList.setAttribute("id", "choiceList");
+            newItem.appendChild(newList);
+            headerElement.appendChild(newItem);
+        }
+
         // Make the RCV selection sortable by drag-and-drop
         function initSortableList(target) {
             target.classList.add("slist");
@@ -206,8 +244,10 @@
 
         // Contest type - currently only plurality or rcv are support
         var contestType = listOfContests[thisContest].tally;
-
-        // Loop over the contests and modify the DOM accordingly.
+        var maxSelection = listOfContests[thisContest].max;
+        var choiceType = listOfContests[thisContest].contest_type;
+        setUpperSection(contestType, maxSelection);
+        setLowerSection(choiceType);
         
         // For RCV, the choice and selection lists and remove (from selection) button
         const choiceList = document.getElementById('choiceList');
