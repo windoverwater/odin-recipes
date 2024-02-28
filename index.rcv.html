@@ -53,6 +53,11 @@
         -->
         <div id="lowerSection"></div>
 
+        <!-- The bottom span start here.
+             Nominally this is where the bottom buttons gp
+        -->
+        <div id="bottomSection"></div>
+
         <!-- -->
         <!-- html ends, javascript starts -->
         <!-- -->
@@ -66,6 +71,16 @@
         } catch (e) {
             console.error(e);
         }
+
+        // Note - for the moment let these be globals (until we know more).
+        // Regardless, the upper/lower setup will make sure choiceList and
+        // sortableList are already defined.
+        var choiceList = null;
+        var sortableList = null;
+        var removeButtons = null;
+
+        // Odds and ends
+        const selectBackgroundColor = "#f5f5f5";
 
         // Get the number of contests which is actually ordered/subdivided by GGO
         var numberOfContests = 0;
@@ -131,7 +146,7 @@
         // Will set up the upperSection
         function setUpperSection(contestType, maxSelection) {
             const rootElement = document.getElementById("upperSection");
-            const newItem = document.createElement('span');
+            const newItem = document.createElement("span");
             if (contestType == "plurality") {
                 let innerText = "<h2>A plurality contest:</h2><ul><li>Make you selection by clicking.  Click again to unselect.</li>";
                 if (maxSelection == 1) {
@@ -151,7 +166,7 @@
                 `;
                 newItem.innerHTML = innerText;
             }
-            const newList = document.createElement('ol');
+            const newList = document.createElement("ol");
             newList.setAttribute("id", "sortableList");
             newItem.appendChild(newList);
             rootElement.appendChild(newItem);
@@ -160,15 +175,15 @@
         // Will set up the lowerSection
         function setLowerSection(choiceType) {
             const rootElement = document.getElementById("upperSection");
-            const newItem = document.createElement('span');
+            const newItem = document.createElement("span");
             if (choiceType == "ticket") {
-                newItem.innerHTML = '<h2>Candidates:</h2>';
+                newItem.innerHTML = "<h2>Candidates:</h2>";
             } else if (choiceType == "question") {
-                newItem.innerHTML = '<h2>Your selection:</h2>';
+                newItem.innerHTML = "<h2>Your selection:</h2>";
             } else {
-                newItem.innerHTML = '<h2>Candidates:</h2>';
+                newItem.innerHTML = "<h2>Candidates:</h2>";
             }
-            const newList = document.createElement('ul');
+            const newList = document.createElement("ul");
             newList.setAttribute("id", "choiceList");
             newItem.appendChild(newList);
             rootElement.appendChild(newItem);
@@ -178,7 +193,7 @@
         function setupChoiceList(choices, choiceType, ticketTitles) {
             const rootElement = document.getElementById("choiceList");
             for (let choice of choices) {
-                const newItem = document.createElement('li');
+                const newItem = document.createElement("li");
                 newItem.classList.add("flex-item"); // Apply a class for styling
 
                 // Create a selection glyph
@@ -186,7 +201,7 @@
                 svgIcon.setAttribute("width", "16");
                 svgIcon.setAttribute("height", "16");
                 svgIcon.setAttribute("viewBox", "0 0 16 16");
-                svgIcon.setAttribute("fill", "#f5f5f5");
+                svgIcon.setAttribute("fill", selectBackgroundColor);
                 svgIcon.innerHTML = '<circle r=6 cx=8 cy=8 stroke="black" stroke-width="1"/>';
 
                 // Create the text element
@@ -275,17 +290,17 @@
         // RCV event listeners
         function setupRCVEventListeners() {
             // Event listener for selection in the first list (when a candidate is selected)
-            choiceList.addEventListener('click', (event) => {
-                if (event.target.tagName === 'LI') {
+            choiceList.addEventListener("click", (event) => {
+                if (event.target.tagName === "LI") {
                     // Create a new selected item with a remove button
                     const selectedText = event.target.textContent;
-                    const newItem = document.createElement('li');
+                    const newItem = document.createElement("li");
                     newItem.classList.add("flex-item"); // Apply a class for styling
 
                     // Create a remove button
-                    const newButton = document.createElement('button');
-                    newButton.innerText = 'remove';
-                    newButton.classList.add('remove');
+                    const newButton = document.createElement("button");
+                    newButton.innerText = "remove";
+                    newButton.classList.add("remove");
                     // add an event listener to the button
                     newButton.addEventListener("click", function (e) {
                         var itemName = e.target.parentNode.textContent.trim().replace(/ remove$/, "");;
@@ -293,7 +308,7 @@
                         // remove it from sortableList
                         e.target.parentNode.remove();
                         // add to choiceList
-                        const listItem = document.createElement('li');
+                        const listItem = document.createElement("li");
                         listItem.textContent = itemName;
                         choiceList.appendChild(listItem);
                     });
@@ -332,6 +347,7 @@
 
         // plurality event listeners
         function setupPluralityEventListeners(maxCount) {
+            let selectedCount = 0;
             choiceList.addEventListener("click", (event) => {
                 const listItem = event.target;
                 const itemText = listItem.textContent;
@@ -341,6 +357,7 @@
                         // Deselect the item
                         listItem.classList.add("unselected");
                         listItem.classList.remove("selected");
+                        listItem.firstElementChild.style.fill = selectBackgroundColor;
                         selectedCount--;
                         // get the svg (first child) and set fill to off
                         console.log("de-selected " + itemIndex + ", " + itemText);
@@ -348,8 +365,9 @@
                         // Select the item (up to maxSelection selections allowed)
                         listItem.classList.add("selected");
                         listItem.classList.remove("unselected");
-                        selectedCount++;
                         // get the svg (first child) and set fill to on (black)
+                        listItem.firstElementChild.style.fill = "black"
+                        selectedCount++;
                         console.log("selected " + itemIndex + ", " + itemText);
                     } else {
                         // Overvote
@@ -359,38 +377,74 @@
             });
         }
 
-        // If here, this is the first contest
-        var thisContest = 0;
-        var thisContestName = Object.keys(listOfContests[thisContest])[0];
-        var thisContestValue = Object.values(listOfContests[thisContest])[0];
-        // set up the bars
-        setupProgressBars(numberOfContests);
-        // and initialize them
-        setProgressBarColor(thisContest, '#D5F5E3');
-        setActiveContest(thisContest);
+        // the next/checkout button listener
+        function setupNextButtonListener(buttonString) {
+            const bottomElement = document.getElementById("bottomSection");
+            const newList = document.createElement("ul");
+            newList.classList.add("flex-item"); // Apply a class for styling
+            newList.classList.add("noBullets");
+            const newItem = document.createElement("li");
+            // Create a next/checkout button
+            const newButton = document.createElement("button");
+            newButton.innerText = buttonString;
+            // add an event listener to the button
+            newButton.addEventListener("click", function (e) {
+                // On the button click go to the next contest or the checkout screen
+                //
+                // Going to the next contest involves:
+                // 1) capturing the vote (a.k.a. thisContest's selections)
+                // 2) clearing out the upper and lower node DOM trees
+                // 3) incrementing thisContest
+                // 4) re-drawing in the next contest
+                // 5) if this is the checkout:
+                //    6) return a castBallot
+                //    7) destroy the blankBallot
 
-        // Setup the upper and lower sections
-        var contestType = thisContestValue.tally;
-        var choiceType = thisContestValue.contest_type;
-        setUpperSection(contestType, thisContestValue.max);
-        setLowerSection(choiceType);
-        
-        // Note - for the moment let these be globals (until we know more).
-        // Regardless, the upper/lower setup will make sure choiceList and
-        // sortableList are already defined.
-        var choiceList = document.getElementById('choiceList');
-        var sortableList = document.getElementById('sortableList');
-        var removeButtons = document.getElementsByClassName("remove");
-        var selectedCount = 0;
-
-        // Setup the choiceList regardless of contest type
-        setupChoiceList(thisContestValue.choices, choiceType, thisContestValue.ticket_offices);
-        if (contestType == "plurality") {
-            setupPluralityEventListeners(thisContestValue.max);
-        } else {
-            setupRCVEventListeners();
+            });
+            // Add to the DOM
+            newList.appendChild(newButton);
+            bottomElement.appendChild(newList);
         }
 
+        // Setup a new contest
+        function setupNewContest(thisContest) {
+            let thisContestName = Object.keys(listOfContests[thisContest])[thisContest];
+            let thisContestValue = Object.values(listOfContests[thisContest])[thisContest];
+
+            // set up the bars
+            setupProgressBars(numberOfContests);
+
+            // and initialize them
+            setProgressBarColor(thisContest, "#D5F5E3");
+            setActiveContest(thisContest);
+
+            // Setup the upper and lower sections
+            let contestType = thisContestValue.tally;
+            let choiceType = thisContestValue.contest_type;
+            setUpperSection(contestType, thisContestValue.max);
+            setLowerSection(choiceType);
+
+            // Note - for the moment let these be globals (until we know more).
+            // Regardless, the upper/lower setup will make sure choiceList and
+            // sortableList are already defined.
+            choiceList = document.getElementById("choiceList");
+            sortableList = document.getElementById("sortableList");
+            removeButtons = document.getElementsByClassName("remove");
+
+            // Setup the choiceList
+            setupChoiceList(thisContestValue.choices, choiceType, thisContestValue.ticket_offices);
+            if (contestType == "plurality") {
+                setupPluralityEventListeners(thisContestValue.max);
+            } else {
+                setupRCVEventListeners();
+            }
+
+            // Setup the bottomSection
+            setupNextButtonListener("Next contest");
+        }
+
+        // If here, this is the first contest
+        setupNewContest(0);
 
         </script>
     </body>
