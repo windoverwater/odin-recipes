@@ -83,16 +83,20 @@
         const selectBackgroundColor = "#f5f5f5";
 
         // Get the number of contests which is actually ordered/subdivided by GGO
-        var numberOfContests = 0;
         const listOfContests = [];
-        for (const ggo of blankBallot.active_ggos) {
-            if (blankBallot.contests[ggo]) {
-                for (const contest of blankBallot.contests[ggo]) {
-                    listOfContests[numberOfContests] = contest;
-                    numberOfContests += 1;
+        function _initialize() {
+            let count = 0;
+            for (const ggo of blankBallot.active_ggos) {
+                if (blankBallot.contests[ggo]) {
+                    for (const contest of blankBallot.contests[ggo]) {
+                        listOfContests[count] = contest;
+                        count += 1;
+                    }
                 }
             }
+            return count;
         }
+        const numberOfContests = _initialize();
         console.log("there are " + numberOfContests + " contest(s)");
 
         // Define a YouAreThere inline glyph
@@ -294,8 +298,10 @@
         }
 
         // RCV event listeners
-        function setupRCVEventListeners() {
+        function setupRCVEventListeners(maxCount) {
+            console.log("Running setupRCVEventListeners:");
             // Event listener for selection in the first list (when a candidate is selected)
+            console.log("Running setupRCVEventListeners:");
             choiceList.addEventListener("click", (event) => {
                 if (event.target.tagName === "LI") {
                     // Create a new selected item with a remove button
@@ -309,6 +315,7 @@
                     newButton.classList.add("remove");
                     // add an event listener to the button
                     newButton.addEventListener("click", function (e) {
+                        console.log("Running RCV eventListener:");
                         var itemName = e.target.parentNode.textContent.trim().replace(/ remove$/, "");;
                         console.log("removing:", itemName);
                         // remove it from sortableList
@@ -353,8 +360,10 @@
 
         // plurality event listeners
         function setupPluralityEventListeners(maxCount) {
+            console.log("Running setupPluralityEventListeners:");
             let selectedCount = 0;
             choiceList.addEventListener("click", (event) => {
+                console.log("Running plurality eventListener:");
                 const listItem = event.target;
                 const itemText = listItem.textContent;
                 const itemIndex = Array.from(choiceList.children).indexOf(listItem);
@@ -384,7 +393,8 @@
         }
 
         // the next/checkout button listener
-        function setupNextButtonListener(buttonString) {
+        function setupNextButtonListener(buttonString, nextContest) {
+            console.log("Running setupNextButtonListener: '" + buttonString + "' button to contest " + nextContest);
             const bottomElement = document.getElementById("bottomSection");
             const newList = document.createElement("ul");
             newList.classList.add("flex-item"); // Apply a class for styling
@@ -395,30 +405,39 @@
             newButton.innerText = buttonString;
             // add an event listener to the button
             newButton.addEventListener("click", function (e) {
+                console.log("Running '" + buttonString + "' button eventListener: contest " + nextContest);
                 // On the button click go to the next contest or the checkout screen
                 //
                 // Going to the next contest involves:
                 // 1) capturing the vote (a.k.a. thisContest's selections)
                 // 2) clearing out the upper and lower node DOM trees
-                // 3) incrementing thisContest
-                // 4) re-drawing in the next contest
-                // 5) if this is the checkout:
-                //    6) return a castBallot
-                //    7) destroy the blankBallot
-
+                document.getElementById("upperSection").replaceChildren();
+                document.getElementById("lowerSection").replaceChildren();
+                document.getElementById("bottomSection").replaceChildren();
+                if (nextContest < numberOfContests) {
+                    // 3a) go to next contest
+                    setupNewContest(nextContest);
+                } else {
+                    // 3b) go to checkout
+                    setupCheckout();
+                }
             });
             // Add to the DOM
             newList.appendChild(newButton);
             bottomElement.appendChild(newList);
         }
 
+        // Setup the checkout
+        function setupCheckout() {
+            console.log("setupCheckout: setting up checkout page");
+        }
+
         // Setup a new contest
         function setupNewContest(thisContest) {
-            let thisContestName = Object.keys(listOfContests[thisContest])[thisContest];
-            let thisContestValue = Object.values(listOfContests[thisContest])[thisContest];
-
-            // set up the bars
-            setupProgressBars(numberOfContests);
+            console.log("Running setupNewContest: contest " + thisContest);
+            let nextContest = thisContest + 1;
+            let thisContestName = Object.keys(listOfContests[thisContest])[0];
+            let thisContestValue = Object.values(listOfContests[thisContest])[0];
 
             // and initialize them
             setProgressBarColor(thisContest, "#D5F5E3");
@@ -442,14 +461,18 @@
             if (contestType == "plurality") {
                 setupPluralityEventListeners(thisContestValue.max);
             } else {
-                setupRCVEventListeners();
+                setupRCVEventListeners(thisContestValue.max);
             }
 
-            // Setup the bottomSection
-            setupNextButtonListener("Next contest");
+            // Setup the bottomSection - this supplies simply "next context/checkout"
+            // navigation
+            setupNextButtonListener("Next contest (" + nextContest + ")", nextContest);
         }
 
         // If here, this is the first contest
+        // set up the bars once
+        setupProgressBars(numberOfContests);
+        // set up the first contest
         setupNewContest(0);
 
         </script>
