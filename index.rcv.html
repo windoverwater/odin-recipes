@@ -12,7 +12,7 @@
 	   border-style: solid;
 	   border-color: red;
            }
-           */
+         */
         </style>
     </head>
     <body>
@@ -179,7 +179,19 @@
             const rootElement = document.getElementById("choiceList");
             for (let choice of choices) {
                 const newItem = document.createElement('li');
-                newItem.innerHTML = choice.name;
+                newItem.classList.add("flex-item"); // Apply a class for styling
+
+                // Create a selection glyph
+                const svgIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svgIcon.setAttribute("width", "16");
+                svgIcon.setAttribute("height", "16");
+                svgIcon.setAttribute("viewBox", "0 0 16 16");
+                svgIcon.setAttribute("fill", "#f5f5f5");
+                svgIcon.innerHTML = '<circle r=6 cx=8 cy=8 stroke="black" stroke-width="1"/>';
+
+                // Create the text element
+                const textElement = document.createElement("span");
+                textElement.textContent = choice.name;
                 if (choiceType == "ticket") {
                     // Note - need to add this as an additional flex-box
                     // so that the 'name' matches the choice
@@ -187,8 +199,14 @@
                     for (let office of ticketTitles) {
                         addendum.push(office + ":" + choice.ticket_names);
                     }
-                    newItem.insertAdjacentHTML('beforeend', "&nbsp&nbsp&nbsp[" + addendum.join(", ") + "]");
+                    textElement.textContent += "[" + addendum.join(", ") + "]";
                 }
+                // Add the unselected class
+                newItem.classList.add("unselected");
+
+                // Append everything ...
+                newItem.appendChild(svgIcon);
+                newItem.appendChild(textElement);
                 rootElement.appendChild(newItem);
             }
         }
@@ -318,17 +336,20 @@
                 const listItem = event.target;
                 const itemText = listItem.textContent;
                 const itemIndex = Array.from(choiceList.children).indexOf(listItem);
-                let selectedCount = 0;
                 if (listItem.tagName === "LI") {
                     if (listItem.classList.contains("selected")) {
                         // Deselect the item
+                        listItem.classList.add("unselected");
                         listItem.classList.remove("selected");
                         selectedCount--;
+                        // get the svg (first child) and set fill to off
                         console.log("de-selected " + itemIndex + ", " + itemText);
                     } else if (selectedCount < maxCount) {
                         // Select the item (up to maxSelection selections allowed)
                         listItem.classList.add("selected");
+                        listItem.classList.remove("unselected");
                         selectedCount++;
+                        // get the svg (first child) and set fill to on (black)
                         console.log("selected " + itemIndex + ", " + itemText);
                     } else {
                         // Overvote
@@ -360,6 +381,7 @@
         var choiceList = document.getElementById('choiceList');
         var sortableList = document.getElementById('sortableList');
         var removeButtons = document.getElementsByClassName("remove");
+        var selectedCount = 0;
 
         // Setup the choiceList regardless of contest type
         setupChoiceList(thisContestValue.choices, choiceType, thisContestValue.ticket_offices);
