@@ -111,13 +111,7 @@
                 const id = contest + 1;
                 // progress bar
                 const newBarElement = document.createElement("div");
-                // Note - the last progress bar section wants to the same class
-                // as the other so not to have any borders
-                if (contest == numberOfContests - 1) {
-                    newBarElement.setAttribute("class", "yrhSection");
-                } else {
-                    newBarElement.setAttribute("class", "progSection");
-                }
+                newBarElement.setAttribute("class", "progSection");
                 newBarElement.setAttribute("id", "progBar" + contest);
                 newBarElement.innerHTML = id;
                 progBarElement.appendChild(newBarElement);
@@ -127,6 +121,18 @@
                 newYrhElement.setAttribute("id", "yrhBar" + contest);
                 yrhBarElement.appendChild(newYrhElement);
             }
+            // Add a final checkout section
+            const newBarElement = document.createElement("div");
+            // Note - the last progress bar section wants to the same class
+            // as the other so not to have any borders
+            newBarElement.setAttribute("class", "yrhSection");
+            newBarElement.setAttribute("id", "progBar" + (numberOfContests + 1));
+            newBarElement.innerHTML = "checkout";
+            progBarElement.appendChild(newBarElement);
+            const newYrhElement = document.createElement("div");
+            newYrhElement.setAttribute("class", "yrhSection");
+            newYrhElement.setAttribute("id", "yrhBar" + (numberOfContests + 1));
+            yrhBarElement.appendChild(newYrhElement);
         }
 
         // Will set the color of the progress bar (per contest)
@@ -174,7 +180,7 @@
 
         // Will set up the lowerSection
         function setLowerSection(choiceType) {
-            const rootElement = document.getElementById("upperSection");
+            const rootElement = document.getElementById("lowerSection");
             const newItem = document.createElement("span");
             if (choiceType == "ticket") {
                 newItem.innerHTML = "<h2>Candidates:</h2>";
